@@ -28,5 +28,5 @@ function getDate() {
     div1.innerHTML = times;
 }
 //使用定时器每秒向div写入当前时间
-setInterval("getDate()", 1000);
+//setInterval("getDate()", 1000);
 
