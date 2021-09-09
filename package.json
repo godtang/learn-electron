@@ -18,5 +18,8 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^13.1.8"
+  },
+  "dependencies": {
+    "lazy": "^1.0.11"
   }
 }

@@ -1,4 +1,5 @@
 
+const { loadFile } = require('./renderer.js');
 
 //定义菜单模板
 function getMenuTemplate(params) {
@@ -10,8 +11,7 @@ function getMenuTemplate(params) {
                     label: '打开',
                     accelerator: 'Ctrl+O',
                     click: () => {
-                        const { dialog } = require('electron')
-                        dialog.showOpenDialog({});
+                        loadFile();
                     }
                 },
                 {

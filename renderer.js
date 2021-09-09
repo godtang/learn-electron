@@ -6,6 +6,10 @@
 // process.
 
 
+const { dialog } = require('electron');
+const fs = require('fs');
+const Lazy = require("lazy");
+
 //得到时间并写入div
 function getDate() {
     //获取当前时间
@@ -30,3 +34,23 @@ function getDate() {
 //使用定时器每秒向div写入当前时间
 //setInterval("getDate()", 1000);
 
+// 加载文件
+function loadFile() {
+    const select = dialog.showOpenDialogSync({});
+    if (undefined != select) {
+        const selectFile = select[0];
+        new Lazy(fs.createReadStream(selectFile))
+            .lines
+            .forEach(
+                function (line) {
+                    let temp = JSON.parse(line.toString());
+                    console.log(temp["timestamp"] + temp["message"]);
+                }
+            );
+    }
+}
+
+module.exports = {
+    getDate,
+    loadFile
+};
