@@ -1,0 +1,30 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node", // 调试器类型，我们是 Node.js 环境
+            "request": "launch", // 请求方式，有 launch(启动) 和 attach(附加) 两种
+            "name": "Launch via NPM", // 启动配置名称
+            "runtimeExecutable": "npm", // 任务运行工具，'npm', 'mocha', 'gulp' 等
+            "runtimeArgs": [
+                "start"
+            ], // 传递给执行工具的可选参数
+            "port": 9339, // 启动程序的端口
+            "skipFiles": [
+                "<node_internals>/**/*.js"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "启动程序",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "npm start"
+        }
+    ]
+}
