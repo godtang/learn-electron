@@ -5,10 +5,40 @@
 // selectively enable features needed in the rendering
 // process.
 
+const { Menu, dialog } = require('electron').remote
+const template = [
+    {
+        label: '文件',
+        submenu: [
+            {
+                label: '打开',
+                accelerator: 'Ctrl+O',
+                click: () => {
+                    loadFile();
+                }
+            },
+            {
+                type: 'separator'
+            },
+            {
+                label: '关闭',
+                accelerator: 'Ctrl+Q',
+                click: () => {
 
-const { dialog } = require('electron');
+                }
+            }
+        ]
+    }
+];
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);
 const fs = require('fs');
 const Lazy = require("lazy");
+
+// ipcRenderer.on('load', (event, arg) => {
+//     console.log(arg) // prints "ping"
+//     event.returnValue = 'pong'
+// })
 
 //得到时间并写入div
 function getDate() {
@@ -39,12 +69,25 @@ function loadFile() {
     const select = dialog.showOpenDialogSync({});
     if (undefined != select) {
         const selectFile = select[0];
+        var body = document.getElementsByTagName('body')[0];
+        var table = document.createElement('div');
+        body.appendChild(table);
         new Lazy(fs.createReadStream(selectFile))
             .lines
             .forEach(
                 function (line) {
                     let temp = JSON.parse(line.toString());
-                    console.log(temp["timestamp"] + temp["message"]);
+                    var tr = document.createElement('div');
+                    var td1 = document.createElement('span');
+                    var td2 = document.createElement('span');
+                    tr.className = "tr";
+                    td1.innerText = temp["timestamp"];
+                    td1.className = "logTime";
+                    td2.innerText = temp["message"];
+                    td2.className = "logMsg";
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    table.appendChild(tr);
                 }
             );
     }

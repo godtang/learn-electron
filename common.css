@@ -1,5 +1,25 @@
-#currenttime {
-  text-align: center;
-  color: red;
-  outline-style: inset;
+body > div{
+  border: 1px solid red;
+}
+
+.tr {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid red;
+}
+
+.logTime{
+  padding: 0 10px;
+  display: inline-block;
+  text-align: left;
+  width: 200px;
+  height: fit-content;
+  flex-shrink: 0;
+}
+
+.logMsg{
+  display: inline-block;
+  border-left: 1px solid red;
+  padding: 0 10px;
+  flex-grow: 1;
 }

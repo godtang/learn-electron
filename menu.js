@@ -1,8 +1,9 @@
 
-const { loadFile } = require('./renderer.js');
+
+
 
 //定义菜单模板
-function getMenuTemplate(params) {
+function getMenuTemplate(win) {
     const template = [
         {
             label: '文件',
@@ -11,7 +12,7 @@ function getMenuTemplate(params) {
                     label: '打开',
                     accelerator: 'Ctrl+O',
                     click: () => {
-                        loadFile();
+                        win.webContents.send('load', 'ping')
                     }
                 },
                 {

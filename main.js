@@ -1,7 +1,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, Menu } = require('electron')
 const path = require('path')
-const getMenuTemplate = require('./menu.js')
+// const getMenuTemplate = require('./menu.js')
 
 function createWindow() {
     // Create the browser window.
@@ -10,18 +10,19 @@ function createWindow() {
         height: 600,
         //frame: false,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: true
         }
     })
     // and load the index.html of the app.
     mainWindow.loadFile('index.html')
     //定义菜单模板
-    const template = getMenuTemplate();
-    const menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(menu);
+
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    mainWindow.webContents.openDevTools()
 }
 
 // This method will be called when Electron has finished

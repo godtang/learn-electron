@@ -10,9 +10,12 @@
 <body>
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>
-    <script src="./menu.js"></script>
 
-
+    <script>
+        require('electron').ipcRenderer.on('load', (event, message) => {
+            console.log(message) // Prints 'whoooooooh!'，这里的message是object类型
+        })
+    </script>
 
 </body>
 
