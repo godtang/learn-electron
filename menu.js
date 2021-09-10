@@ -12,7 +12,7 @@ function getMenuTemplate(win) {
                     label: '打开',
                     accelerator: 'Ctrl+O',
                     click: () => {
-                        win.webContents.send('load', 'ping')
+                        win.webContents.send('menuTrigger', 'open')
                     }
                 },
                 {

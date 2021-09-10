@@ -10,8 +10,13 @@ const { ipcRenderer } = require('electron')
 const fs = require('fs');
 const Lazy = require("lazy");
 
-ipcRenderer.on('load', (event, arg) => {
-    loadFile();
+ipcRenderer.on('menuTrigger', (event, arg) => {
+    if (arg === "open") {
+        loadFile();
+    }
+    else {
+        console.log("unknow " + arg);
+    }
 })
 
 // 加载文件
@@ -44,6 +49,5 @@ function loadFile() {
 }
 
 module.exports = {
-    getDate,
     loadFile
 };
