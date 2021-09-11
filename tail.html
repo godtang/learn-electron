@@ -215,7 +215,8 @@
                  */
                 boundEvents[event].apply(this, args);
             }
-        };</script>
+        };
+    </script>
     <script>
 
         $(function () {
@@ -224,12 +225,18 @@
             $('#read').click(function () {
                 var file = $('#file').get(0).files[0];
                 var totalCount = 1;
-                var $output = $('#output');
+                var output = document.getElementById("output");
 
                 lr.on('line', function (line, next) {
-                    $output.text($output.text() + '\n' + totalCount + ': ' + line);
-
-                    totalCount++;
+                    var obj = JSON.parse(line);;
+                    var div = document.createElement('div');
+                    var spanTime = document.createElement('span');
+                    var spanMsg = document.createElement('span');
+                    spanTime.innerText = obj.timestamp;
+                    spanMsg.innerText = obj.message;
+                    div.appendChild(spanTime);
+                    div.appendChild(spanMsg);
+                    output.appendChild(div);
 
                     next();
                 });
