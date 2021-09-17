@@ -226,6 +226,7 @@
                 var file = $('#file').get(0).files[0];
                 var totalCount = 1;
                 var output = document.getElementById("output");
+                output.innerText = "";
                 //output.style = "border: 1px solid red;";
 
                 lr.on('line', function (line, next) {
