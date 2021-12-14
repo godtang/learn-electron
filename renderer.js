@@ -39,6 +39,16 @@ function loadFile(fileName) {
                 td1.innerText = temp["timestamp"];
                 td1.className = "logTime";
                 td2.innerText = temp["message"];
+                // try {
+                //     temp = JSON.parse(temp["message"]);
+                // } catch (error) {
+
+                // }
+                // try {
+                //     td2.innerText = JSON.stringify(temp["message"], null, '\t');
+                // } catch (error) {
+
+                // }
                 td2.className = "logMsg";
                 tr.appendChild(td1);
                 tr.appendChild(td2);
