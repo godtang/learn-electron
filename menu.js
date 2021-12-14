@@ -1,5 +1,5 @@
 
-
+const { dialog } = require('electron')
 
 
 //定义菜单模板
@@ -12,7 +12,10 @@ function getMenuTemplate(win) {
                     label: '打开',
                     accelerator: 'Ctrl+O',
                     click: () => {
-                        win.webContents.send('menuTrigger', 'open')
+                        const select = dialog.showOpenDialogSync({});
+                        if (undefined != select) {
+                            win.webContents.send('menuTrigger', 'open', select[0])
+                        }
                     }
                 },
                 {
