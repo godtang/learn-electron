@@ -24,4 +24,6 @@ body > div{
   border-left: 1px solid red;
   padding: 0 10px;
   flex-grow: 1;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
