@@ -12,6 +12,9 @@ const Lazy = require("lazy");
 
 ipcRenderer.on('menuTrigger', (event, arg) => {
     if (arg === "open") {
+        if (document.querySelector("body > div")) {
+            document.querySelector("body > div").remove();
+        }
         loadFile();
     }
     else {
