@@ -105,5 +105,6 @@ function insertLine(text) {
     tr.appendChild(td1);
     tr.appendChild(td2);
     table.appendChild(tr);
+    window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' })
 }
 
