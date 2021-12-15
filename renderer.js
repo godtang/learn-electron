@@ -42,20 +42,17 @@ function loadFile(fileName) {
                 td1.innerText = temp["timestamp"];
                 td1.className = "logTime";
                 var msg = temp["message"];
+                td2.innerText = msg;
                 if (typeof msg === "string") {
                     try {
                         msg = JSON.parse(msg);
+                        td2.innerText = JSON.stringify(msg, null, '\t');
                     } catch (error) {
                     }
+                } else {
+                    td2.innerText = JSON.stringify(msg, null, '\t');
                 }
-                td2.innerText = JSON.stringify(msg, null, '\t');
 
-
-                // try {
-                //     td2.innerText = JSON.stringify(temp["message"], null, '\t');
-                // } catch (error) {
-
-                // }
                 td2.className = "logMsg";
                 tr.appendChild(td1);
                 tr.appendChild(td2);
