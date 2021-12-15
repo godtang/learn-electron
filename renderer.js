@@ -10,6 +10,9 @@ const { ipcRenderer } = require('electron')
 const fs = require('fs');
 const Lazy = require("lazy");
 
+var filename = '';
+var filesize = 0;
+
 ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
         if (document.querySelector("body > div")) {
@@ -38,12 +41,16 @@ function loadFile(fileName) {
                 tr.className = "tr";
                 td1.innerText = temp["timestamp"];
                 td1.className = "logTime";
-                td2.innerText = temp["message"];
-                // try {
-                //     temp = JSON.parse(temp["message"]);
-                // } catch (error) {
+                var msg = temp["message"];
+                if (typeof msg === "string") {
+                    try {
+                        msg = JSON.parse(msg);
+                    } catch (error) {
+                    }
+                }
+                td2.innerText = JSON.stringify(msg, null, '\t');
 
-                // }
+
                 // try {
                 //     td2.innerText = JSON.stringify(temp["message"], null, '\t');
                 // } catch (error) {
@@ -58,6 +65,3 @@ function loadFile(fileName) {
 
 }
 
-module.exports = {
-    loadFile
-};
