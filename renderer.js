@@ -10,23 +10,34 @@ const { ipcRenderer } = require('electron')
 const fs = require('fs');
 const Lazy = require("lazy");
 
-var filename = '';
+var openingFileName = '';
 var filesize = 0;
+var opening = true;
 
 ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
         if (document.querySelector("body > div")) {
             document.querySelector("body > div").remove();
         }
-        loadFile(arg2);
+        openFile(arg2);
     }
     else {
         console.log("unknow " + arg);
     }
 })
 
+async function openFile(fileName) {
+    if ("" != openingFileName) {
+        fs.unwatchFile(openingFileName);
+    }
+    await loadFile(fileName);
+    watchFile(fileName);
+    openingFileName = fileName;
+}
+
 // 加载文件
-function loadFile(fileName) {
+async function loadFile(fileName) {
+    opening = true;
     var body = document.getElementsByTagName('body')[0];
     var table = document.createElement('div');
     body.appendChild(table);
@@ -37,11 +48,11 @@ function loadFile(fileName) {
                 insertLine(line);
             }
         );
-    watchFile(fileName);
 }
 
-async function watchFile(filename) {
+function watchFile(filename) {
     console.log('watchFile');
+    opening = false;
     fs.open(filename, 'r', function (error, fd) {
         var buffer;
         var remainder = null;
@@ -60,8 +71,10 @@ async function watchFile(filename) {
                     });
                 } else if (curr.size - prev.size < 0) {
                     // 文件删除了部分数据，需要重新加载
+                    openFile(filename);
                 } else {
                     //没有变化
+                    openFile(filename);
                 }
             } else {
                 console.log('文件读取错误');
@@ -105,6 +118,11 @@ function insertLine(text) {
     tr.appendChild(td1);
     tr.appendChild(td2);
     table.appendChild(tr);
-    window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' })
+    if (opening) {
+        window.scrollTo({ top: document.body.clientHeight })
+    } else {
+        window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' })
+    }
+
 }
 
