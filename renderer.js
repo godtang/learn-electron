@@ -13,12 +13,15 @@ const Lazy = require("lazy");
 var openingFileName = '';
 var filesize = 0;
 var opening = true;
+var lineCount = 0;
+const lineMax = 1000;
 
 ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
         if (document.querySelector("body > div")) {
             document.querySelector("body > div").remove();
         }
+        lineCount = 0;
         openFile(arg2);
     }
     else {
@@ -90,6 +93,7 @@ function generateTxt(str) { // 处理新增内容的地方
 
 function insertLine(text) {
     if ('' === text) return;
+    limitMaxLine();
     var table = document.querySelector("body > div");
     let temp = JSON.parse(text.toString());
     var tr = document.createElement('div');
@@ -119,6 +123,13 @@ function insertLine(text) {
     } else {
         window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' })
     }
+    lineCount++;
+}
 
+function limitMaxLine(){
+    if(lineCount>lineMax){
+        document.querySelector("body > div > div:nth-child(1)").remove();
+        lineCount--;
+    }
 }
 
