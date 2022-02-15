@@ -41,13 +41,9 @@ async function loadFile(fileName) {
     var body = document.getElementsByTagName('body')[0];
     var table = document.createElement('div');
     body.appendChild(table);
-    new Lazy(fs.createReadStream(fileName))
-        .lines
-        .forEach(
-            function (line) {
-                insertLine(line);
-            }
-        );
+    fs.readFile(fileName,(err,data)=>{
+        generateTxt(data.toString());
+    });
 }
 
 function watchFile(filename) {
