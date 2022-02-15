@@ -1,5 +1,20 @@
 # electron-quick-start
 
+## build
+运行命令
+```
+electron-packager . 'JsonLogShower' --platform=win32 --arch=x64 --out=./out --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --overwrite
+```
+
+编译时如果出现
+```
+electron : 无法加载文件 nodejs\node_global\electron.ps1，因为在此系统上禁止运行脚本。解决办法
+```
+在管理员权限下运行并重启VSCODE
+```
+set-ExecutionPolicy RemoteSigned
+```
+
 **Clone and run for a quick way to see Electron in action.**
 
 This is a minimal Electron application based on the [Quick Start Guide](https://electronjs.org/docs/latest/tutorial/quick-start) within the Electron documentation.
