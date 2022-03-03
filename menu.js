@@ -29,6 +29,21 @@ function getMenuTemplate(win) {
                     }
                 }
             ]
+        },
+        {
+            label: '选项',
+            submenu: [
+                {
+                    label: '过滤',
+                    accelerator: 'Ctrl+L',
+                    click: () => {
+                        const select = dialog.showOpenDialogSync({});
+                        if (undefined != select) {
+                            win.webContents.send('menuTrigger', 'open', select[0])
+                        }
+                    }
+                }
+            ]
         }
     ];
     return template;
