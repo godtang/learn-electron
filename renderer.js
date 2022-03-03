@@ -18,10 +18,6 @@ const lineMax = 1000;
 
 ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
-        if (document.querySelector("body > div")) {
-            document.querySelector("body > div").remove();
-        }
-        lineCount = 0;
         openFile(arg2);
     }
     else {
@@ -30,6 +26,10 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
 })
 
 async function openFile(fileName) {
+    if (document.querySelector("body > div")) {
+        document.querySelector("body > div").remove();
+    }
+    lineCount = 0;
     if ("" != openingFileName) {
         fs.unwatchFile(openingFileName);
     }
@@ -132,4 +132,17 @@ function limitMaxLine(){
         lineCount--;
     }
 }
+
+document.addEventListener("drop",(e)=>{
+    e.preventDefault(); //阻止e的默认行为
+    const files = e.dataTransfer.files;
+    if (files && files.length>=1){
+        const path = files[0].path;
+        openFile(path);
+    }
+})
+//这个事件也需要屏蔽
+document.addEventListener("dragover",(e)=>{
+    e.preventDefault();
+})
 
