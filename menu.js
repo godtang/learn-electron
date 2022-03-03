@@ -1,5 +1,5 @@
 
-const { dialog } = require('electron')
+const { dialog } = require('electron');
 
 
 //定义菜单模板
@@ -14,7 +14,7 @@ function getMenuTemplate(win) {
                     click: () => {
                         const select = dialog.showOpenDialogSync({});
                         if (undefined != select) {
-                            win.webContents.send('menuTrigger', 'open', select[0])
+                            win.webContents.send('menuTrigger', 'open', select[0]);
                         }
                     }
                 },
@@ -39,8 +39,16 @@ function getMenuTemplate(win) {
                     click: () => {
                         const select = dialog.showOpenDialogSync({});
                         if (undefined != select) {
-                            win.webContents.send('menuTrigger', 'open', select[0])
+                            win.webContents.send('menuTrigger', 'open', select[0]);
                         }
+                    }
+                },
+                {
+                    label: '停止/刷新',
+                    accelerator: 'Ctrl+P',
+                    click: () => {
+                        console.log("暂停不好做，先用停止和重新打开吧");
+                        win.webContents.send('menuTrigger', 'pause');
                     }
                 }
             ]

@@ -6,13 +6,14 @@
 // process.
 
 
-const { ipcRenderer } = require('electron')
+const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const Lazy = require("lazy");
 
 var openingFileName = '';
 var filesize = 0;
 var opening = true;
+var tailing = false;
 var lineCount = 0;
 const lineMax = 1000;
 
@@ -20,10 +21,25 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
         openFile(arg2);
     }
+    else if (arg1 === "pause") {
+        console.log("pause");
+        pauseTail();
+    }
     else {
         console.log("unknow " + arg);
     }
-})
+});
+
+function pauseTail() {
+    if (tailing) {
+        openFile(openingFileName);
+    } else {
+        if ("" != openingFileName) {
+            fs.unwatchFile(openingFileName);
+        }
+    }
+    tailing = !tailing;
+}
 
 async function openFile(fileName) {
     if (document.querySelector("body > div")) {
@@ -66,7 +82,7 @@ function watchFile(filename) {
                     //文件内容有变化，那么通知相应的进程可以执行相关操作。例如读物文件写入数据库等
                     buffer = new Buffer.alloc(curr.size - prev.size);
                     fs.read(fd, buffer, 0, (curr.size - prev.size), prev.size, function (err, bytesRead, buffer) {
-                        generateTxt(buffer.toString())
+                        generateTxt(buffer.toString());
                     });
                 } else if (curr.size - prev.size < 0) {
                     // 文件删除了部分数据，需要重新加载
@@ -126,9 +142,9 @@ function insertLine(text) {
     tr.appendChild(td2);
     table.appendChild(tr);
     if (opening) {
-        window.scrollTo({ top: document.body.clientHeight })
+        window.scrollTo({ top: document.body.clientHeight });
     } else {
-        window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' })
+        window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' });
     }
     lineCount++;
 }
@@ -147,9 +163,9 @@ document.addEventListener("drop", (e) => {
         const path = files[0].path;
         openFile(path);
     }
-})
+});
 //这个事件也需要屏蔽
 document.addEventListener("dragover", (e) => {
     e.preventDefault();
-})
+});
 
