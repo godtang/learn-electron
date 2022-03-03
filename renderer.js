@@ -44,7 +44,7 @@ async function loadFile(fileName) {
     var body = document.getElementsByTagName('body')[0];
     var table = document.createElement('div');
     body.appendChild(table);
-    fs.readFile(fileName,(err,data)=>{
+    fs.readFile(fileName, (err, data) => {
         generateTxt(data.toString());
     });
 }
@@ -85,9 +85,16 @@ function watchFile(filename) {
 
 function generateTxt(str) { // 处理新增内容的地方
     var temp = str.split('\r\n');
+    var skipLen = 0;
+    if (temp.length > lineMax) {
+        skipLen = temp.length - lineMax;
+    }
     var table = document.querySelector("body > div");
     for (var s in temp) {
-        insertLine(temp[s]);
+        skipLen--;
+        if (skipLen <= 0) {
+            insertLine(temp[s]);
+        }
     }
 }
 
@@ -126,23 +133,23 @@ function insertLine(text) {
     lineCount++;
 }
 
-function limitMaxLine(){
-    if(lineCount>lineMax){
+function limitMaxLine() {
+    if (lineCount > lineMax) {
         document.querySelector("body > div > div:nth-child(1)").remove();
         lineCount--;
     }
 }
 
-document.addEventListener("drop",(e)=>{
+document.addEventListener("drop", (e) => {
     e.preventDefault(); //阻止e的默认行为
     const files = e.dataTransfer.files;
-    if (files && files.length>=1){
+    if (files && files.length >= 1) {
         const path = files[0].path;
         openFile(path);
     }
 })
 //这个事件也需要屏蔽
-document.addEventListener("dragover",(e)=>{
+document.addEventListener("dragover", (e) => {
     e.preventDefault();
 })
 
