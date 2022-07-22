@@ -17,7 +17,7 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^19.0.8"
+    "electron": "^19.0.9"
   },
   "dependencies": {
     "lazy": "^1.0.11"
