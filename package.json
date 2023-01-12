@@ -4,7 +4,8 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager . JsonLogShower --platform=win32 --arch=x64 --out=./out --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --overwrite"
   },
   "repository": "https://github.com/godtang/learn-electron",
   "keywords": [
@@ -20,6 +21,7 @@
     "electron": "^19.0.8"
   },
   "dependencies": {
+    "electron-builder": "^23.6.0",
     "lazy": "^1.0.11"
   }
 }
