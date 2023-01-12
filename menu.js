@@ -37,10 +37,8 @@ function getMenuTemplate(win) {
                     label: '过滤',
                     accelerator: 'Ctrl+L',
                     click: () => {
-                        const select = dialog.showOpenDialogSync({});
-                        if (undefined != select) {
-                            win.webContents.send('menuTrigger', 'open', select[0]);
-                        }
+                        console.log("过滤先准备好");
+                        win.webContents.send('menuTrigger', 'filter');
                     }
                 },
                 {

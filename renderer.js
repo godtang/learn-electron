@@ -25,6 +25,12 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
         console.log("pause");
         pauseTail();
     }
+    else if (arg1 === "filter") {
+        console.log("filter");
+        // logger.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
+        // logger.log(`process.cwd: ${process.cwd()}`);
+        // logger.log(`__dirname: ${__dirname}`);
+    }
     else {
         console.log("unknow " + arg);
     }
