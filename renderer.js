@@ -17,6 +17,12 @@ var tailing = false;
 var lineCount = 0;
 const lineMax = 1000;
 
+const logLevleEnum = {
+    debug: 'debug',
+    info: 'info',
+    error: 'error',
+};
+
 ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
         openFile(arg2);
@@ -27,12 +33,15 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     }
     else if (arg1 === "filter") {
         console.log("filter");
-        // logger.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
-        // logger.log(`process.cwd: ${process.cwd()}`);
-        // logger.log(`__dirname: ${__dirname}`);
+        console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
+        console.log(`process.cwd: ${process.cwd()}`);
+        console.log(`__dirname: ${__dirname}`);
+    }
+    else if (arg1 === "log") {
+        setLogLevel(arg2);
     }
     else {
-        console.log("unknow " + arg);
+        console.log("unknow " + arg1);
     }
 });
 
@@ -175,3 +184,10 @@ document.addEventListener("dragover", (e) => {
     e.preventDefault();
 });
 
+function setLogLevel(level) {
+    console.log(level);
+    if (!(level in logLevleEnum)) {
+        console.log(`${level} is invalid`);
+        return;
+    }
+}

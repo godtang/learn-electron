@@ -39,7 +39,23 @@ function getMenuTemplate(win) {
                     click: () => {
                         console.log("过滤先准备好");
                         win.webContents.send('menuTrigger', 'filter');
-                    }
+                    },
+                    submenu: [
+                        {
+                            label: 'debug',
+                            click: () => {
+                                win.webContents.send('menuTrigger', 'log', 'debug');
+                            },
+                            type: "radio"
+                        },
+                        {
+                            label: 'info',
+                            click: () => {
+                                win.webContents.send('menuTrigger', 'log', 'info');
+                            },
+                            type: "radio"
+                        }
+                    ]
                 },
                 {
                     label: '停止/刷新',
