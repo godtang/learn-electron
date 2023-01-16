@@ -20,8 +20,8 @@ function createWindow() {
     mainWindow.loadFile('index.html');
     //定义菜单模板
     const menu = Menu.buildFromTemplate(getMenuTemplate(mainWindow));
+    refreshMenuLogLevel(menu);
     Menu.setApplicationMenu(menu);
-
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
 }
@@ -51,3 +51,8 @@ app.on('window-all-closed', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+function refreshMenuLogLevel(menu) {
+
+    menu.getMenuItemById('log.error').checked = true;
+}

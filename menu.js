@@ -43,6 +43,7 @@ function getMenuTemplate(win) {
                     submenu: [
                         {
                             label: 'debug',
+                            "id": "log.debug",
                             click: () => {
                                 win.webContents.send('menuTrigger', 'log', 'debug');
                             },
@@ -50,6 +51,7 @@ function getMenuTemplate(win) {
                         },
                         {
                             label: 'info',
+                            "id": "log.info",
                             click: () => {
                                 win.webContents.send('menuTrigger', 'log', 'info');
                             },
@@ -57,6 +59,7 @@ function getMenuTemplate(win) {
                         },
                         {
                             label: 'error',
+                            "id": "log.error",
                             click: () => {
                                 win.webContents.send('menuTrigger', 'log', 'error');
                             },
