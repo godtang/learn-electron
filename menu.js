@@ -54,6 +54,13 @@ function getMenuTemplate(win) {
                                 win.webContents.send('menuTrigger', 'log', 'info');
                             },
                             type: "radio"
+                        },
+                        {
+                            label: 'error',
+                            click: () => {
+                                win.webContents.send('menuTrigger', 'log', 'error');
+                            },
+                            type: "radio"
                         }
                     ]
                 },
