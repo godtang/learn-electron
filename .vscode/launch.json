@@ -15,7 +15,10 @@
             "port": 9339, // 启动程序的端口
             "skipFiles": [
                 "<node_internals>/**/*.js"
-            ]
+            ],
+            "env": {
+                "DEBUG": "true"
+            }
         },
         {
             "type": "node",
