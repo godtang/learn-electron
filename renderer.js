@@ -9,6 +9,7 @@
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const Lazy = require("lazy");
+const path = require('path');
 
 var openingFileName = '';
 var filesize = 0;
@@ -22,6 +23,7 @@ const logLevleEnum = {
     info: 'info',
     error: 'error',
 };
+var currentLogLevel = logLevleEnum.debug;
 
 ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     if (arg1 === "open") {
@@ -57,6 +59,7 @@ function pauseTail() {
 }
 
 async function openFile(fileName) {
+    refreshMenuLogLevel();
     if (document.querySelector("body > div")) {
         document.querySelector("body > div").remove();
     }
@@ -185,9 +188,50 @@ document.addEventListener("dragover", (e) => {
 });
 
 function setLogLevel(level) {
-    console.log(level);
+    console.log(`set log level ${level}`);
     if (!(level in logLevleEnum)) {
         console.log(`${level} is invalid`);
         return;
     }
+    currentLogLevel = level;
+    const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
+    fs.exists(configFile, function (exists) {
+        console.log(exists ? "文件存在" : "文件不存在");
+        if (!exists) {
+            dialog.showErrorBox("错误", "查找失败，配置文件文件不存在!");
+            return;
+        } else {
+            //读取本地的json文件
+            let result = JSON.parse(fs.readFileSync(configFile));
+            result['log']['level'] = currentLogLevel;
+            var text = JSON.stringify(result, "\n", 4);
+            fs.writeFileSync(configFile, text);
+        }
+    });
+
 }
+
+function refreshMenuLogLevel() {
+    const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
+    fs.exists(configFile, function (exists) {
+        console.log(exists ? "文件存在" : "文件不存在");
+        if (!exists) {
+            dialog.showErrorBox("错误", "查找失败，配置文件文件不存在!");
+            return;
+        } else {
+            //读取本地的json文件
+            let result = JSON.parse(fs.readFileSync(configFile));
+            if (result['log']['level'] == 'debug') {
+                currentLogLevel = logLevleEnum.debug;
+            }
+            else if (result['log']['level'] == 'info') {
+                currentLogLevel = logLevleEnum.info;
+            }
+            else if (result['log']['level'] == 'error') {
+                currentLogLevel = logLevleEnum.error;
+            }
+        }
+    });
+
+}
+
