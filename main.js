@@ -55,29 +55,22 @@ app.on('window-all-closed', function () {
 
 function refreshMenuLogLevel(menu) {
     const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
-    dialog.showErrorBox("错误", configFile);
     fs.exists(configFile, function (exists) {
         console.log(exists ? "文件存在" : "文件不存在");
-        menu.getMenuItemById('log.error').checked = true;
         if (!exists) {
             dialog.showErrorBox("错误", "查找失败，配置文件文件不存在!");
             return;
         } else {
             //读取本地的json文件
             let result = JSON.parse(fs.readFileSync(configFile));
-            //遍历读取到的用户对象，进行登录验证
-            for (var i in result) {
-                if ((result[i].lid == username) && (result[i].password == password)) {
-                    //验证成功，向主进程通信，发送打开编辑用户窗口的通知
-                    let data = JSON.stringify(result[i]);
-                    ipc.send('open-user-editor', data);
-                    loginFlag = true;
-                    break;
-                }
+            if (result['log']['level'] == 'debug') {
+                menu.getMenuItemById('log.debug').checked = true;
             }
-            if (!loginFlag) {
-                $(".errorInformation").show();
-                $(".errorInformation").text("用户名或密码错误!");
+            else if (result['log']['level'] == 'info') {
+                menu.getMenuItemById('log.info').checked = true;
+            }
+            else if (result['log']['level'] == 'error') {
+                menu.getMenuItemById('log.error').checked = true;
             }
         }
     });
