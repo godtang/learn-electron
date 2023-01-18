@@ -19,9 +19,10 @@ var lineCount = 0;
 const lineMax = 1000;
 
 const logLevleEnum = {
-    debug: 'debug',
-    info: 'info',
-    error: 'error',
+    debug: 0,
+    info: 1,
+    warn: 2,
+    error: 3
 };
 var currentLogLevel = logLevleEnum.debug;
 
@@ -137,6 +138,8 @@ function insertLine(text) {
     limitMaxLine();
     var table = document.querySelector("body > div");
     let temp = JSON.parse(text.toString());
+    if (logLevleEnum[temp['level']] < currentLogLevel)
+        return;
     var tr = document.createElement('div');
     var td1 = document.createElement('span');
     var td2 = document.createElement('span');
@@ -226,6 +229,9 @@ function refreshMenuLogLevel() {
             }
             else if (result['log']['level'] == 'info') {
                 currentLogLevel = logLevleEnum.info;
+            }
+            else if (result['log']['level'] == 'warn') {
+                currentLogLevel = logLevleEnum.warn;
             }
             else if (result['log']['level'] == 'error') {
                 currentLogLevel = logLevleEnum.error;
