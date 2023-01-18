@@ -127,19 +127,18 @@ function generateTxt(str) { // 处理新增内容的地方
     var table = document.querySelector("body > div");
     for (var s in temp) {
         skipLen--;
-        if (skipLen <= 0) {
-            insertLine(temp[s]);
-        }
+        //if (skipLen <= 0) {
+        insertLine(temp[s]);
+        //}
     }
 }
 
 function insertLine(text) {
     if ('' === text) return;
-    limitMaxLine();
     var table = document.querySelector("body > div");
     let temp = JSON.parse(text.toString());
-    if (logLevleEnum[temp['level']] < currentLogLevel)
-        return;
+    if (logLevleEnum[temp['level']] < currentLogLevel) return;
+    limitMaxLine();
     var tr = document.createElement('div');
     var td1 = document.createElement('span');
     var td2 = document.createElement('span');
