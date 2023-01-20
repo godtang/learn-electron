@@ -44,7 +44,7 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
         setLogLevel(arg2);
     }
     else if (arg1 === "find") {
-        findString('debug');
+        findString();
         //window.open("https://github.com", "_blank", "top=500,left=200,frame=false,nodeIntegration=no");
     }
     else {
@@ -244,8 +244,9 @@ function refreshMenuLogLevel() {
 
 }
 
-function findString(str) {
-    if (parseInt(navigator.appVersion) < 4) return;
+function findString() {
+    var findShow;
+    var str = 'debug';
     var strFound;
     if (window.find) {
 
