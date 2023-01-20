@@ -43,6 +43,10 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     else if (arg1 === "log") {
         setLogLevel(arg2);
     }
+    else if (arg1 === "find") {
+        findString('debug');
+        //window.open("https://github.com", "_blank", "top=500,left=200,frame=false,nodeIntegration=no");
+    }
     else {
         console.log("unknow " + arg1);
     }
@@ -240,3 +244,19 @@ function refreshMenuLogLevel() {
 
 }
 
+function findString(str) {
+    if (parseInt(navigator.appVersion) < 4) return;
+    var strFound;
+    if (window.find) {
+
+        // CODE FOR BROWSERS THAT SUPPORT window.find
+
+        strFound = self.find(str);
+        if (!strFound) {
+            strFound = self.find(str, 0, 1);
+            while (self.find(str, 0, 1)) continue;
+        }
+    }
+    //if (!strFound) dialog.showErrorBox("错误", "String '" + str + "' not found!");
+    return;
+}
