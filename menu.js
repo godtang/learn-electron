@@ -82,6 +82,13 @@ function getMenuTemplate(win) {
                         console.log("暂停不好做，先用停止和重新打开吧");
                         win.webContents.send('menuTrigger', 'pause');
                     }
+                },
+                {
+                    label: '查找',
+                    accelerator: 'Ctrl+F',
+                    click: () => {
+                        win.webContents.send('menuTrigger', 'find');
+                    }
                 }
             ]
         }
