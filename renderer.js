@@ -246,6 +246,11 @@ function refreshMenuLogLevel() {
 
 function findString() {
     var findShow;
+    if ('' == document.getElementById('search').getAttribute('hidden')) {
+        document.getElementById('search').removeAttribute('hidden');
+    } else {
+        document.getElementById('search').setAttribute('hidden', true);
+    }
     var str = 'debug';
     var strFound;
     if (window.find) {
