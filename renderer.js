@@ -44,7 +44,7 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
         setLogLevel(arg2);
     }
     else if (arg1 === "find") {
-        findString();
+        showFind();
         //window.open("https://github.com", "_blank", "top=500,left=200,frame=false,nodeIntegration=no");
     }
     else {
@@ -244,25 +244,25 @@ function refreshMenuLogLevel() {
 
 }
 
-function findString() {
+function showFind() {
     var findShow;
     if ('' == document.getElementById('search').getAttribute('hidden') || 'true' == document.getElementById('search').getAttribute('hidden')) {
         document.getElementById('search').removeAttribute('hidden');
     } else {
         document.getElementById('search').setAttribute('hidden', true);
     }
-    // var str = 'debug';
-    // var strFound;
-    // if (window.find) {
 
-    //     // CODE FOR BROWSERS THAT SUPPORT window.find
-
-    //     strFound = self.find(str);
-    //     if (!strFound) {
-    //         strFound = self.find(str, 0, 1);
-    //         while (self.find(str, 0, 1)) continue;
-    //     }
-    // }
-    //if (!strFound) dialog.showErrorBox("错误", "String '" + str + "' not found!");
     return;
+}
+
+function findString() {
+    var str = document.getElementById('searchInput').value;
+    var strFound;
+    if (window.find) {
+        strFound = self.find(str);
+        if (!strFound) {
+            strFound = self.find(str, 0, 1);
+            while (self.find(str, 0, 1)) continue;
+        }
+    }
 }
