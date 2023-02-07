@@ -246,23 +246,23 @@ function refreshMenuLogLevel() {
 
 function findString() {
     var findShow;
-    if ('' == document.getElementById('search').getAttribute('hidden')) {
+    if ('' == document.getElementById('search').getAttribute('hidden') || 'true' == document.getElementById('search').getAttribute('hidden')) {
         document.getElementById('search').removeAttribute('hidden');
     } else {
         document.getElementById('search').setAttribute('hidden', true);
     }
-    var str = 'debug';
-    var strFound;
-    if (window.find) {
+    // var str = 'debug';
+    // var strFound;
+    // if (window.find) {
 
-        // CODE FOR BROWSERS THAT SUPPORT window.find
+    //     // CODE FOR BROWSERS THAT SUPPORT window.find
 
-        strFound = self.find(str);
-        if (!strFound) {
-            strFound = self.find(str, 0, 1);
-            while (self.find(str, 0, 1)) continue;
-        }
-    }
+    //     strFound = self.find(str);
+    //     if (!strFound) {
+    //         strFound = self.find(str, 0, 1);
+    //         while (self.find(str, 0, 1)) continue;
+    //     }
+    // }
     //if (!strFound) dialog.showErrorBox("错误", "String '" + str + "' not found!");
     return;
 }
