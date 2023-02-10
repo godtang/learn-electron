@@ -1,4 +1,4 @@
-body > div{   
+body>div {
   border-left: 1px solid red;
   border-top: 1px solid red;
   border-right: 1px solid red
@@ -10,7 +10,7 @@ body > div{
   border-bottom: 1px solid red;
 }
 
-.logTime{
+.logTime {
   padding: 0 10px;
   display: inline-block;
   text-align: left;
@@ -19,16 +19,30 @@ body > div{
   flex-shrink: 0;
 }
 
-.logMsg{
+.logMsg {
   display: inline-block;
   border-left: 1px solid red;
   padding: 0 10px;
   flex-grow: 1;
   overflow-wrap: anywhere;
   word-break: normal;
-  white-space: pre-wrap; /* css-3 */ 
-  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */ 
-  white-space: -pre-wrap; /* Opera 4-6 */ 
-  white-space: -o-pre-wrap; /* Opera 7 */ 
+  white-space: pre-wrap;
+  /* css-3 */
+  white-space: -moz-pre-wrap;
+  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;
+  /* Opera 4-6 */
+  white-space: -o-pre-wrap;
+  /* Opera 7 */
   overflow: auto;
+}
+
+#search {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-left: -100px;
+  margin-top: -100px;
+  border: 1px solid #000;
+  background-color: rgba(0, 255, 255, 0.5);
 }
