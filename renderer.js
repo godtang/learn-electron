@@ -84,8 +84,45 @@ async function loadFile(fileName) {
     var table = document.createElement('div');
     body.appendChild(table);
     fs.readFile(fileName, (err, data) => {
-        generateTxt(data.toString());
+        //generateTxt(data.toString());
+        appendLog(data.toString());
     });
+}
+
+function appendLog(str) {
+    var logList = str.split('\r\n');
+    var table = document.querySelector("body > div");
+    var fragment = document.createDocumentFragment();
+    for (var s of logList) {
+        if ('' === s)
+            continue;
+        let temp = JSON.parse(s.toString());
+        if (logLevleEnum[temp['level']] < currentLogLevel)
+            continue;
+        var tr = document.createElement('div');
+        var td1 = document.createElement('span');
+        var td2 = document.createElement('span');
+        tr.className = "tr";
+        td1.innerText = temp["timestamp"];
+        td1.className = "logTime";
+        var msg = temp["message"];
+        td2.innerText = msg;
+        if (typeof msg === "string") {
+            try {
+                msg = JSON.parse(msg);
+                td2.innerText = JSON.stringify(msg, null, '\t');
+            } catch (error) {
+            }
+        } else {
+            td2.innerText = JSON.stringify(msg, null, '\t');
+        }
+
+        td2.className = "logMsg";
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        fragment.appendChild(tr);
+    }
+    table.appendChild(fragment);
 }
 
 function watchFile(filename) {
@@ -105,7 +142,8 @@ function watchFile(filename) {
                     //文件内容有变化，那么通知相应的进程可以执行相关操作。例如读物文件写入数据库等
                     buffer = new Buffer.alloc(curr.size - prev.size);
                     fs.read(fd, buffer, 0, (curr.size - prev.size), prev.size, function (err, bytesRead, buffer) {
-                        generateTxt(buffer.toString());
+                        //generateTxt(buffer.toString());
+                        appendLog(buffer.toString());
                     });
                 } else if (curr.size - prev.size < 0) {
                     // 文件删除了部分数据，需要重新加载
@@ -214,7 +252,7 @@ function setLogLevel(level) {
             fs.writeFileSync(configFile, text);
         }
     });
-
+    openFile(openingFileName);
 }
 
 function refreshMenuLogLevel() {
