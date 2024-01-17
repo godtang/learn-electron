@@ -116,8 +116,15 @@ function appendLog(str) {
         } else {
             td2.innerText = JSON.stringify(msg, null, '\t');
         }
-        if (logLevleEnum[temp['level']] === logLevleEnum.info) {
-            td2.style.color = "#aabbcc";
+        if (logLevleEnum[temp['level']] === logLevleEnum.debug) {
+            //td2.style.color = "#111111";
+            td2.style.color = "gray";
+        }
+        else if (logLevleEnum[temp['level']] === logLevleEnum.info) {
+            td2.style.color = "black";
+        }
+        else if (logLevleEnum[temp['level']] === logLevleEnum.warn) {
+            td2.style.color = "blue";
         }
         else if (logLevleEnum[temp['level']] === logLevleEnum.error) {
             td2.style.color = "red";
