@@ -5,6 +5,10 @@
 ```
 electron-packager . 'JsonLogShower' --platform=win32 --arch=x64 --out=./out --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --overwrite
 ```
+```
+npx electron-packager . 'JsonLogShower' --platform=win32 --arch=x64 --download.mirrorOptions.mirror=https://npm.taobao.org/mirrors/electron/ --overwrite --no-tmpdir --out=D:/soft/UiBotJsonLogShower
+```
+
 
 编译时如果出现
 ```
