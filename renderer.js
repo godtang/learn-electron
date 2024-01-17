@@ -116,6 +116,12 @@ function appendLog(str) {
         } else {
             td2.innerText = JSON.stringify(msg, null, '\t');
         }
+        if (logLevleEnum[temp['level']] === logLevleEnum.info) {
+            td2.style.color = "#aabbcc";
+        }
+        else if (logLevleEnum[temp['level']] === logLevleEnum.error) {
+            td2.style.color = "red";
+        }
 
         td2.className = "logMsg";
         tr.appendChild(td1);
