@@ -244,13 +244,17 @@ document.addEventListener("dragover", (e) => {
     e.preventDefault();
 });
 
+function getEnumString(enumObject, value) {
+    return Object.keys(enumObject).find(key => enumObject[key] === value);
+}
+
 function setLogLevel(level) {
-    console.log(`set log level ${level}`);
+    console.log(`set log level ${level}, currentLogLevel ${getEnumString(logLevleEnum, currentLogLevel)}`);
     if (!(level in logLevleEnum)) {
         console.log(`${level} is invalid`);
         return;
     }
-    currentLogLevel = level;
+    currentLogLevel = logLevleEnum[level];
     const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
     fs.exists(configFile, function (exists) {
         console.log(exists ? "文件存在" : "文件不存在");
@@ -260,7 +264,7 @@ function setLogLevel(level) {
         } else {
             //读取本地的json文件
             let result = JSON.parse(fs.readFileSync(configFile));
-            result['log']['level'] = currentLogLevel;
+            result['log']['level'] = level;
             var text = JSON.stringify(result, "\n", 4);
             fs.writeFileSync(configFile, text);
         }
