@@ -63,8 +63,12 @@ function pauseTail() {
     tailing = !tailing;
 }
 
+refreshMenuLogLevel();
 async function openFile(fileName) {
-    refreshMenuLogLevel();
+    if (fileName === undefined || fileName === "") {
+        console.log("fileName is empty");
+        return;
+    }
     if (document.querySelector("body > div")) {
         document.querySelector("body > div").remove();
     }
@@ -139,7 +143,7 @@ function appendLog(str) {
 }
 
 function watchFile(filename) {
-    console.log('watchFile');
+    console.log(`watchFile ${filename}`);
     opening = false;
     fs.open(filename, 'r', function (error, fd) {
         var buffer;
@@ -257,9 +261,9 @@ function setLogLevel(level) {
     currentLogLevel = logLevleEnum[level];
     const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
     fs.exists(configFile, function (exists) {
-        console.log(exists ? "文件存在" : "文件不存在");
+        //console.log(exists ? "文件存在" : "文件不存在");
         if (!exists) {
-            dialog.showErrorBox("错误", "查找失败，配置文件文件不存在!");
+            dialog.showErrorBox("错误", `setLogLevel 查找${configFile}失败，配置文件文件不存在!`);
             return;
         } else {
             //读取本地的json文件
@@ -275,9 +279,9 @@ function setLogLevel(level) {
 function refreshMenuLogLevel() {
     const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
     fs.exists(configFile, function (exists) {
-        console.log(exists ? "文件存在" : "文件不存在");
+        //console.log(exists ? "文件存在" : "文件不存在");
         if (!exists) {
-            dialog.showErrorBox("错误", "查找失败，配置文件文件不存在!");
+            dialog.showErrorBox("错误", `refreshMenuLogLevel 查找${configFile}失败，配置文件文件不存在!`);
             return;
         } else {
             //读取本地的json文件
