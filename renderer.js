@@ -17,6 +17,8 @@ var opening = true;
 var tailing = false;
 var lineCount = 0;
 const lineMax = 1000;
+const timeChekckCount = 100;
+const timeCheckInterval = 100;
 
 const logLevleEnum = {
     debug: 0,
@@ -45,6 +47,10 @@ ipcRenderer.on('menuTrigger', (event, arg1, arg2) => {
     }
     else if (arg1 === "find") {
         showFind();
+        //window.open("https://github.com", "_blank", "top=500,left=200,frame=false,nodeIntegration=no");
+    }
+    else if (arg1 === "findCost") {
+        showFindCost();
         //window.open("https://github.com", "_blank", "top=500,left=200,frame=false,nodeIntegration=no");
     }
     else {
@@ -95,6 +101,27 @@ async function loadFile(fileName) {
 
 function appendLog(str) {
     var logList = str.split('\r\n');
+    new Promise((resolve, reject) => {
+        setTimeout(() => {
+            for (let i = 0; i < logList.length - timeChekckCount; i++) {
+                const log1 = logList[i];
+                const log2 = logList[i + timeChekckCount];
+                if ('' === log2)
+                    continue;
+                let temp1 = JSON.parse(log1.toString());
+                let temp2 = JSON.parse(log2.toString());
+                const timestamp1 = Date.parse(temp1["timestamp"]);
+                const timestamp2 = Date.parse(temp2["timestamp"]);
+                if (timestamp2 - timestamp1 <= timeCheckInterval) {
+                    //console.log(`timestamp1 ${timestamp1} timestamp2 ${timestamp2}`);
+                    console.log(`log1(${i}) ${log1}, log2(${i + timeChekckCount}) ${log2}`);
+                    i = i + timeChekckCount - 1;
+                }
+            }
+            console.log("i'm done");
+            resolve();
+        }, 1000);
+    });
     var table = document.querySelector("body > div");
     var fragment = document.createDocumentFragment();
     for (var s of logList) {
@@ -303,15 +330,50 @@ function refreshMenuLogLevel() {
 
 }
 
-function showFind() {
-    var findShow;
-    if ('' == document.getElementById('search').getAttribute('hidden') || 'true' == document.getElementById('search').getAttribute('hidden')) {
-        document.getElementById('search').removeAttribute('hidden');
+var findTextShow = false;
+function showFind(show) {
+    if (undefined != show) {
+        if (show) {
+            showFindCost(false);
+            document.getElementById('search').removeAttribute('hidden');
+            findTextShow = true;
+        } else {
+            document.getElementById('search').setAttribute('hidden', true);
+            findTextShow = false;
+        }
     } else {
-        document.getElementById('search').setAttribute('hidden', true);
+        if ('' == document.getElementById('search').getAttribute('hidden') || 'true' == document.getElementById('search').getAttribute('hidden')) {
+            showFindCost(false);
+            document.getElementById('search').removeAttribute('hidden');
+            findTextShow = true;
+        } else {
+            document.getElementById('search').setAttribute('hidden', true);
+            findTextShow = false;
+        }
     }
+}
 
-    return;
+var findCostShow = false;
+function showFindCost(show) {
+    if (undefined != show) {
+        if (show) {
+            showFind(false);
+            document.getElementById('searchCost').removeAttribute('hidden');
+            findCostShow = true;
+        } else {
+            document.getElementById('searchCost').setAttribute('hidden', true);
+            findCostShow = false;
+        }
+    } else {
+        if ('' == document.getElementById('searchCost').getAttribute('hidden') || 'true' == document.getElementById('searchCost').getAttribute('hidden')) {
+            showFind(false);
+            document.getElementById('searchCost').removeAttribute('hidden');
+            findCostShow = true;
+        } else {
+            document.getElementById('searchCost').setAttribute('hidden', true);
+            findCostShow = false;
+        }
+    }
 }
 
 function findString() {

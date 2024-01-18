@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <meta charset="UTF-8">
-    <title>JSonLogReader</title>
-    <link rel="stylesheet" type="text/css" href="common.css">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>JSonLogReader</title>
+        <link rel="stylesheet" type="text/css" href="common.css">
+    </head>
 
-<body>
-    <!-- You can also require other files to run in this process -->
-    <script src="./renderer.js"></script>
-    <search id='search' hidden>
-        <input id='searchInput'>
-        <button id='searchBtn' onclick="findString()">查找</button>
-    </search>
+    <body>
+        <!-- You can also require other files to run in this process -->
+        <script src="./renderer.js"></script>
+        <search id='search' hidden>
+            <input id='searchInput'>
+            <button id='searchBtn' onclick="findString()">查找</button>
+        </search>
+        <search id='searchCost' hidden>
+            <span>日志条数</span>
+            <input id='searchCostLogCount' value="100">
+            <span>耗时差距（毫秒）</span>
+            <input id='searchCostSpan' value="100">
+            <button id='searchCostBtn' onclick="findString()">查找</button>
+        </search>
 
 
-</body>
+
+    </body>
 
 </html>

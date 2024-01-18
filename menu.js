@@ -89,6 +89,13 @@ function getMenuTemplate(win) {
                     click: () => {
                         win.webContents.send('menuTrigger', 'find');
                     }
+                },
+                {
+                    label: '查找高消耗',
+                    accelerator: 'Ctrl+Shift+F',
+                    click: () => {
+                        win.webContents.send('menuTrigger', 'findCost');
+                    }
                 }
             ]
         }
