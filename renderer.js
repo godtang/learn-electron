@@ -101,27 +101,6 @@ async function loadFile(fileName) {
 
 function appendLog(str) {
     var logList = str.split('\r\n');
-    new Promise((resolve, reject) => {
-        setTimeout(() => {
-            for (let i = 0; i < logList.length - timeChekckCount; i++) {
-                const log1 = logList[i];
-                const log2 = logList[i + timeChekckCount];
-                if ('' === log2)
-                    continue;
-                let temp1 = JSON.parse(log1.toString());
-                let temp2 = JSON.parse(log2.toString());
-                const timestamp1 = Date.parse(temp1["timestamp"]);
-                const timestamp2 = Date.parse(temp2["timestamp"]);
-                if (timestamp2 - timestamp1 <= timeCheckInterval) {
-                    //console.log(`timestamp1 ${timestamp1} timestamp2 ${timestamp2}`);
-                    console.log(`log1(${i}) ${log1}, log2(${i + timeChekckCount}) ${log2}`);
-                    i = i + timeChekckCount - 1;
-                }
-            }
-            console.log("i'm done");
-            resolve();
-        }, 1000);
-    });
     var table = document.querySelector("body > div");
     var fragment = document.createDocumentFragment();
     for (var s of logList) {
@@ -384,6 +363,32 @@ function findString() {
         if (!strFound) {
             strFound = self.find(str, 0, 1);
             while (self.find(str, 0, 1)) continue;
+        }
+    }
+}
+
+function findCostLog() {
+    var count = parseInt(document.getElementById('searchCostLogCount').value);
+    var span = parseInt(document.getElementById('searchCostSpan').value);
+    var content = document.querySelector("body > div").querySelectorAll('div');
+    const costLine = new Array(content.length).fill(false);
+    for (let i = 0; i < content.length; i++) {
+        content[i].querySelector('span.logTime').style.backgroundColor = "";
+    }
+    for (let i = 0; i < content.length - count; i++) {
+        content[i].querySelector('span.logTime').style.backgroundColor = "";
+        var timestamp1 = Date.parse(content[i].querySelector('span.logTime').innerText);
+        var timestamp2 = Date.parse(content[i + count].querySelector('span.logTime').innerText);
+        if (timestamp2 - timestamp1 <= span) {
+            console.log(`第${i}行到第${i + count}行时间差小于${span}ms`);
+            for (let j = i; j <= i + count; j++) {
+                costLine[j] = true;
+            }
+        }
+    }
+    for (let i = 0; i < content.length; i++) {
+        if (costLine[i]) {
+            content[i].querySelector('span.logTime').style.backgroundColor = "red";
         }
     }
 }
