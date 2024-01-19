@@ -380,7 +380,7 @@ function findCostLog() {
         var timestamp1 = Date.parse(content[i].querySelector('span.logTime').innerText);
         var timestamp2 = Date.parse(content[i + count].querySelector('span.logTime').innerText);
         if (timestamp2 - timestamp1 <= span) {
-            console.log(`第${i}行到第${i + count}行时间差小于${span}ms`);
+            //console.log(`第${i}行到第${i + count}行时间差小于${span}ms`);
             for (let j = i; j <= i + count; j++) {
                 costLine[j] = true;
             }
