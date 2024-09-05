@@ -113,7 +113,7 @@ function appendLog(str) {
         var td1 = document.createElement('span');
         var td2 = document.createElement('span');
         tr.className = "tr";
-        td1.innerText = temp["timestamp"];
+        td1.innerText = temp["longdate"];
         td1.className = "logTime";
         var msg = temp["message"];
         td2.innerText = msg;
