@@ -103,6 +103,7 @@ function appendLog(str) {
     var logList = str.split('\r\n');
     var table = document.querySelector("body > div");
     var fragment = document.createDocumentFragment();
+    var config = getConfig();
     for (var s of logList) {
         if ('' === s)
             continue;
@@ -120,10 +121,10 @@ function appendLog(str) {
 
         filterTd.innerText = temp["logger"];
         filterTd.className = "filter";
-        if (!(filterTd.innerText.includes("Laiye.EntCmd.Host.CAP.AttachmentServiceSubscriber")
-            || filterTd.innerText.includes("Laiye.EntCmd.Host.CAP.CleanServiceSubscriber")
-            || filterTd.innerText.includes("Laiye.EntCmd.Host.Clean"))) {
-            continue;
+        if (config["filter"].length > 0) {
+            if (!config["filter"].some(substring => filterTd.innerText.includes(substring))) {
+                continue;
+            }
         }
 
         var msg = temp["message"];
@@ -403,4 +404,9 @@ function findCostLog() {
             content[i].querySelector('span.logTime').style.backgroundColor = "red";
         }
     }
+}
+
+function getConfig() {
+    const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');
+    return JSON.parse(fs.readFileSync(configFile));
 }
