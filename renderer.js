@@ -107,43 +107,55 @@ function appendLog(str) {
         if ('' === s)
             continue;
         let temp = JSON.parse(s.toString());
-        if (logLevleEnum[temp['level']] < currentLogLevel)
+        var logLevel = temp["level"].toString().toLowerCase();
+        if (logLevleEnum[logLevel] < currentLogLevel)
             continue;
-        var tr = document.createElement('div');
-        var td1 = document.createElement('span');
-        var td2 = document.createElement('span');
-        tr.className = "tr";
-        td1.innerText = temp["longdate"];
-        td1.className = "logTime";
+        var rowTr = document.createElement('div');
+        var timeTd = document.createElement('span');
+        var filterTd = document.createElement('span');
+        var msgTd = document.createElement('span');
+        rowTr.className = "tr";
+        timeTd.innerText = temp["longdate"];
+        timeTd.className = "logTime";
+
+        filterTd.innerText = temp["logger"];
+        filterTd.className = "filter";
+        if (!(filterTd.innerText.includes("Laiye.EntCmd.Host.CAP.AttachmentServiceSubscriber")
+            || filterTd.innerText.includes("Laiye.EntCmd.Host.CAP.CleanServiceSubscriber")
+            || filterTd.innerText.includes("Laiye.EntCmd.Host.Clean"))) {
+            continue;
+        }
+
         var msg = temp["message"];
-        td2.innerText = msg;
+        msgTd.innerText = msg;
         if (typeof msg === "string") {
             try {
                 msg = JSON.parse(msg);
-                td2.innerText = JSON.stringify(msg, null, '\t');
+                msgTd.innerText = JSON.stringify(msg, null, '\t');
             } catch (error) {
             }
         } else {
-            td2.innerText = JSON.stringify(msg, null, '\t');
+            msgTd.innerText = JSON.stringify(msg, null, '\t');
         }
-        if (logLevleEnum[temp['level']] === logLevleEnum.debug) {
+        if (logLevleEnum[logLevel] === logLevleEnum.debug) {
             //td2.style.color = "#111111";
-            td2.style.color = "gray";
+            msgTd.style.color = "gray";
         }
-        else if (logLevleEnum[temp['level']] === logLevleEnum.info) {
-            td2.style.color = "black";
+        else if (logLevleEnum[logLevel] === logLevleEnum.info) {
+            msgTd.style.color = "black";
         }
-        else if (logLevleEnum[temp['level']] === logLevleEnum.warn) {
-            td2.style.color = "blue";
+        else if (logLevleEnum[logLevel] === logLevleEnum.warn) {
+            msgTd.style.color = "blue";
         }
-        else if (logLevleEnum[temp['level']] === logLevleEnum.error) {
-            td2.style.color = "red";
+        else if (logLevleEnum[logLevel] === logLevleEnum.error) {
+            msgTd.style.color = "red";
         }
 
-        td2.className = "logMsg";
-        tr.appendChild(td1);
-        tr.appendChild(td2);
-        fragment.appendChild(tr);
+        msgTd.className = "logMsg";
+        rowTr.appendChild(timeTd);
+        //rowTr.appendChild(filterTd);
+        rowTr.appendChild(msgTd);
+        fragment.appendChild(rowTr);
     }
     table.appendChild(fragment);
 }
@@ -202,7 +214,7 @@ function insertLine(text) {
     if ('' === text) return;
     var table = document.querySelector("body > div");
     let temp = JSON.parse(text.toString());
-    if (logLevleEnum[temp['level']] < currentLogLevel) return;
+    if (logLevleEnum[temp['level'].toString().toLowerCase()] < currentLogLevel) return;
     limitMaxLine();
     var tr = document.createElement('div');
     var td1 = document.createElement('span');
