@@ -18,6 +18,9 @@ var tailing = false;
 var lineCount = 0;
 const lineMax = 1000;
 
+// 高亮关键词数组
+var highlightKeywords = [];
+
 // 字段映射配置（默认值）
 var fieldMapping = {
     timestamp: 'timestamp',
@@ -158,18 +161,25 @@ function insertLine(text) {
     td1.innerText = temp[fieldMapping.timestamp];
     td1.className = "logTime";
     var msg = temp[fieldMapping.message];
-    td2.innerText = msg;
+
+    // 处理消息内容
+    var msgText;
     if (typeof msg === "string") {
         try {
             msg = JSON.parse(msg);
-            td2.innerText = JSON.stringify(msg, null, '\t');
+            msgText = JSON.stringify(msg, null, '\t');
         } catch (error) {
+            msgText = msg;
         }
     } else {
-        td2.innerText = JSON.stringify(msg, null, '\t');
+        msgText = JSON.stringify(msg, null, '\t');
     }
 
+    // 保存原始文本并应用高亮
     td2.className = "logMsg";
+    td2.dataset.originalText = msgText;
+    td2.innerHTML = highlightText(msgText);
+
     tr.appendChild(td1);
     tr.appendChild(td2);
     table.appendChild(tr);
@@ -257,14 +267,13 @@ function refreshMenuLogLevel() {
 }
 
 function showFind() {
-    var findShow;
-    if ('' == document.getElementById('search').getAttribute('hidden') || 'true' == document.getElementById('search').getAttribute('hidden')) {
-        document.getElementById('search').removeAttribute('hidden');
+    var searchEl = document.getElementById('search');
+    var isHidden = searchEl.hasAttribute('hidden');
+    if (isHidden) {
+        searchEl.removeAttribute('hidden');
     } else {
-        document.getElementById('search').setAttribute('hidden', true);
+        searchEl.setAttribute('hidden', true);
     }
-
-    return;
 }
 
 function findString() {
@@ -277,4 +286,60 @@ function findString() {
             while (self.find(str, 0, 1)) continue;
         }
     }
+}
+
+function applyHighlight() {
+    var input = document.getElementById('highlightInput').value;
+    highlightKeywords = input.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    console.log('应用高亮关键词:', highlightKeywords);
+
+    // 重新渲染所有日志行
+    var table = document.querySelector("body > div");
+    if (table) {
+        var rows = table.querySelectorAll('.tr');
+        rows.forEach(row => {
+            var msgSpan = row.querySelector('.logMsg');
+            if (msgSpan && msgSpan.dataset.originalText) {
+                msgSpan.innerHTML = highlightText(msgSpan.dataset.originalText);
+            } else if (msgSpan) {
+                msgSpan.dataset.originalText = msgSpan.innerHTML;
+            }
+        });
+    }
+}
+
+function clearHighlight() {
+    highlightKeywords = [];
+    document.getElementById('highlightInput').value = '';
+    console.log('清除高亮');
+
+    // 恢复所有日志行
+    var table = document.querySelector("body > div");
+    if (table) {
+        var rows = table.querySelectorAll('.tr');
+        rows.forEach(row => {
+            var msgSpan = row.querySelector('.logMsg');
+            if (msgSpan && msgSpan.dataset.originalText) {
+                msgSpan.innerHTML = msgSpan.dataset.originalText;
+                delete msgSpan.dataset.originalText;
+            }
+        });
+    }
+}
+
+function highlightText(text) {
+    if (!highlightKeywords || highlightKeywords.length === 0) {
+        return text;
+    }
+
+    var result = text;
+    highlightKeywords.forEach(keyword => {
+        var regex = new RegExp(escapeRegExp(keyword), 'gi');
+        result = result.replace(regex, '<mark class="highlight">$&</mark>');
+    });
+    return result;
+}
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
