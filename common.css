@@ -46,6 +46,11 @@ search {
   padding: 10px;
   background-color: #f0f0f0;
   border-bottom: 1px solid #ccc;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 search input {
@@ -58,4 +63,9 @@ search button {
   margin-right: 5px;
   padding: 5px 10px;
   cursor: pointer;
+}
+
+/* 为固定查找框预留空间 */
+body > div {
+  margin-top: 70px;
 }
