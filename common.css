@@ -6,7 +6,7 @@ body > div{
 
 .tr {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   border-bottom: 1px solid red;
 }
 
