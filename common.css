@@ -65,6 +65,11 @@ search button {
   cursor: pointer;
 }
 
+search button.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
 /* 为固定查找框预留空间 */
 body > div {
   margin-top: 70px;

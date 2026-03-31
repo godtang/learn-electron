@@ -20,6 +20,8 @@ const lineMax = 1000;
 
 // 高亮关键词数组
 var highlightKeywords = [];
+// 过滤开关
+var filterHighlight = false;
 
 // 字段映射配置（默认值）
 var fieldMapping = {
@@ -180,6 +182,11 @@ function insertLine(text) {
     td2.dataset.originalText = msgText;
     td2.innerHTML = highlightText(msgText);
 
+    // 如果开启了过滤，检查是否需要显示
+    if (filterHighlight && !shouldHighlight(msgText)) {
+        tr.style.display = 'none';
+    }
+
     tr.appendChild(td1);
     tr.appendChild(td2);
     table.appendChild(tr);
@@ -310,8 +317,16 @@ function applyHighlight() {
 
 function clearHighlight() {
     highlightKeywords = [];
+    filterHighlight = false;
     document.getElementById('highlightInput').value = '';
     console.log('清除高亮');
+
+    // 重置按钮状态
+    var filterBtn = document.querySelector('#search button:last-child');
+    if (filterBtn) {
+        filterBtn.classList.remove('active');
+        filterBtn.textContent = '只显示高亮';
+    }
 
     // 恢复所有日志行
     var table = document.querySelector("body > div");
@@ -323,8 +338,52 @@ function clearHighlight() {
                 msgSpan.innerHTML = msgSpan.dataset.originalText;
                 delete msgSpan.dataset.originalText;
             }
+            row.style.display = ''; // 显示所有行
         });
     }
+}
+
+function toggleFilter() {
+    if (!highlightKeywords || highlightKeywords.length === 0) {
+        alert('请先设置高亮关键词');
+        return;
+    }
+    filterHighlight = !filterHighlight;
+    console.log('过滤高亮:', filterHighlight);
+
+    // 更新按钮状态
+    var filterBtn = document.querySelector('#search button:last-child');
+    if (filterHighlight) {
+        filterBtn.classList.add('active');
+        filterBtn.textContent = '已过滤';
+    } else {
+        filterBtn.classList.remove('active');
+        filterBtn.textContent = '只显示高亮';
+    }
+
+    var table = document.querySelector("body > div");
+    if (table) {
+        var rows = table.querySelectorAll('.tr');
+        rows.forEach(row => {
+            var msgSpan = row.querySelector('.logMsg');
+            if (msgSpan && msgSpan.dataset.originalText) {
+                var shouldShow = !filterHighlight || shouldHighlight(msgSpan.dataset.originalText);
+                row.style.display = shouldShow ? '' : 'none';
+            }
+        });
+    }
+}
+
+function shouldHighlight(text) {
+    if (!highlightKeywords || highlightKeywords.length === 0) {
+        return false;
+    }
+    for (var i = 0; i < highlightKeywords.length; i++) {
+        if (text.toLowerCase().indexOf(highlightKeywords[i].toLowerCase()) !== -1) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function highlightText(text) {
