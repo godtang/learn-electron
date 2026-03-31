@@ -18,6 +18,13 @@ var tailing = false;
 var lineCount = 0;
 const lineMax = 1000;
 
+// 字段映射配置（默认值）
+var fieldMapping = {
+    timestamp: 'timestamp',
+    level: 'level',
+    message: 'message'
+};
+
 const logLevleEnum = {
     debug: 0,
     info: 1,
@@ -138,18 +145,19 @@ function generateTxt(str) { // 处理新增内容的地方
 }
 
 function insertLine(text) {
+    text = text.trim();
     if ('' === text) return;
     var table = document.querySelector("body > div");
     let temp = JSON.parse(text.toString());
-    if (logLevleEnum[temp['level']] < currentLogLevel) return;
+    if (logLevleEnum[temp[fieldMapping.level]] < currentLogLevel) return;
     limitMaxLine();
     var tr = document.createElement('div');
     var td1 = document.createElement('span');
     var td2 = document.createElement('span');
     tr.className = "tr";
-    td1.innerText = temp["timestamp"];
+    td1.innerText = temp[fieldMapping.timestamp];
     td1.className = "logTime";
-    var msg = temp["message"];
+    var msg = temp[fieldMapping.message];
     td2.innerText = msg;
     if (typeof msg === "string") {
         try {
@@ -238,6 +246,10 @@ function refreshMenuLogLevel() {
             }
             else if (result['log']['level'] == 'error') {
                 currentLogLevel = logLevleEnum.error;
+            }
+            // 加载字段映射配置
+            if (result['fields']) {
+                fieldMapping = result['fields'];
             }
         }
     });
