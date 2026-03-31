@@ -58,7 +58,7 @@ function refreshMenuLogLevel(menu) {
     fs.exists(configFile, function (exists) {
         console.log(exists ? "文件存在" : "文件不存在");
         if (!exists) {
-            dialog.showErrorBox("错误", "查找失败，配置文件文件不存在!");
+            dialog.showErrorBox("错误", `查找失败，配置文件${configFile}不存在!`);
             return;
         } else {
             //读取本地的json文件
