@@ -135,19 +135,17 @@ async function openFile(fileName) {
     // 更新最近打开的文件列表
     updateOpenedFiles(fileName);
 
-    // 显示加载效果（在 DOM 更新后）
-    setTimeout(function () {
+    try {
+        // 显示加载效果
         showLoading(true);
-        // 确保 UI 刷新后再开始加载
-        setTimeout(function () {
-            loadFile(fileName, function () {
-                // 文件加载完成后的回调
-                watchFile(fileName);
-                openingFileName = fileName;
-                isLoading = false; // 重置加载标志
-            });
-        }, 50);
-    }, 0);
+        // 等待文件加载完成
+        await loadFile(fileName);
+        // 文件加载完成后开始监听
+        watchFile(fileName);
+        openingFileName = fileName;
+    } finally {
+        isLoading = false;
+    }
 }
 
 // 更新最近打开的文件列表
@@ -156,79 +154,85 @@ function updateOpenedFiles(fileName) {
         ? path.join(process.cwd(), 'config.json')
         : path.join(process.cwd(), 'resources/app/config.json');
 
-    fs.exists(configFile, function (exists) {
-        if (!exists) return;
+    if (!fs.existsSync(configFile)) return;
 
-        let config = JSON.parse(fs.readFileSync(configFile));
-        if (!config.openedFiles) {
-            config.openedFiles = [];
-        }
-        // 移除已存在的相同文件
-        config.openedFiles = config.openedFiles.filter(f => f !== fileName);
-        // 添加到开头
-        config.openedFiles.unshift(fileName);
-        // 最多保留 5 个
-        if (config.openedFiles.length > 5) {
-            config.openedFiles.pop();
-        }
-        // 保存配置
-        fs.writeFileSync(configFile, JSON.stringify(config, null, 4));
+    let config = JSON.parse(fs.readFileSync(configFile));
+    if (!config.openedFiles) {
+        config.openedFiles = [];
+    }
+    // 移除已存在的相同文件
+    config.openedFiles = config.openedFiles.filter(f => f !== fileName);
+    // 添加到开头
+    config.openedFiles.unshift(fileName);
+    // 最多保留 5 个
+    if (config.openedFiles.length > 5) {
+        config.openedFiles.pop();
+    }
+    // 保存配置
+    fs.writeFileSync(configFile, JSON.stringify(config, null, 4));
 
-        // 通知主进程刷新菜单
-        ipcRenderer.send('refreshMenu');
+    // 通知主进程刷新菜单
+    ipcRenderer.send('refreshMenu');
+}
+
+// 等待流式读取完成
+function readStreamAsync(readStream) {
+    return new Promise((resolve, reject) => {
+        let remainder = '';
+        let lineBuffer = [];
+        const batchSize = 100; // 每批处理 100 行
+
+        readStream.on('data', (chunk) => {
+            remainder += chunk;
+            var lines = remainder.split(/\r\n|\n|\r/);
+
+            // 最后一行可能不完整，保留到下一次处理
+            remainder = lines.pop() || '';
+
+            for (var i = 0; i < lines.length; i++) {
+                lineBuffer.push(lines[i]);
+
+                // 达到批次大小时处理一次
+                if (lineBuffer.length >= batchSize) {
+                    processLines(lineBuffer);
+                    lineBuffer = [];
+                }
+            }
+        });
+
+        readStream.on('end', () => {
+            console.log('loadFile: 文件读取完成');
+            // 处理剩余的行
+            if (remainder) {
+                lineBuffer.push(remainder);
+            }
+            if (lineBuffer.length > 0) {
+                processLines(lineBuffer);
+            }
+            resolve();
+        });
+
+        readStream.on('error', (err) => {
+            reject(err);
+        });
     });
 }
 
 // 加载文件
-function loadFile(fileName, callback) {
+async function loadFile(fileName) {
     opening = true;
 
     // 使用流式读取大文件
     const readStream = fs.createReadStream(fileName, { encoding: 'utf8' });
-    let remainder = '';
-    let lineBuffer = [];
-    const batchSize = 100; // 每批处理 100 行
 
-    readStream.on('data', (chunk) => {
-        remainder += chunk;
-        var lines = remainder.split(/\r\n|\n|\r/);
-
-        // 最后一行可能不完整，保留到下一次处理
-        remainder = lines.pop() || '';
-
-        for (var i = 0; i < lines.length; i++) {
-            lineBuffer.push(lines[i]);
-
-            // 达到批次大小时处理一次
-            if (lineBuffer.length >= batchSize) {
-                processLines(lineBuffer);
-                lineBuffer = [];
-            }
-        }
-    });
-
-    readStream.on('end', () => {
-        console.log('loadFile: 文件读取完成');
-        // 处理剩余的行
-        if (remainder) {
-            lineBuffer.push(remainder);
-        }
-        if (lineBuffer.length > 0) {
-            processLines(lineBuffer);
-        }
+    try {
+        await readStreamAsync(readStream);
         // 设置 opening 为 false，表示初始加载完成
         opening = false;
         // 数据加载完成后关闭加载效果
         showLoading(false);
-        console.log('loadFile: 准备调用回调');
-        // 调用回调
-        if (callback) {
-            callback();
-        }
-        console.log('loadFile: 回调执行完成');
-    });
-
-    readStream.on('error', (err) => {
+        console.log('loadFile: 加载完成');
+    } catch (err) {
         console.error('读取文件失败:', err);
         showLoading(false);
         opening = false;
@@ -238,10 +242,8 @@ function loadFile(fileName, callback) {
             fs.close(currentFd);
             currentFd = null;
         }
-        if (callback) {
-            callback();
-        }
-    });
+        throw err;
+    }
 }
 
 // 处理行数据
