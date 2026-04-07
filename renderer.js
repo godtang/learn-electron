@@ -6,7 +6,7 @@
 // process.
 
 
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, dialog } = require('electron');
 const fs = require('fs');
 const Lazy = require("lazy");
 const path = require('path');
@@ -17,6 +17,9 @@ var opening = true;
 var tailing = false;
 var lineCount = 0;
 var currentLineNumber = 0; // 当前处理行号
+var isLoading = false; // 是否正在加载文件
+var currentFd = null; // 当前打开的文件描述符
+var loadingHideTimer = null; // 隐藏加载效果的定时器
 const lineMax = 1000;
 
 // 高亮关键词数组
@@ -35,7 +38,12 @@ const logLevleEnum = {
     debug: 0,
     info: 1,
     warn: 2,
-    error: 3
+    error: 3,
+    // 支持大写格式
+    DEBUG: 0,
+    INFO: 1,
+    WARN: 2,
+    ERROR: 3
 };
 var currentLogLevel = logLevleEnum.debug;
 
@@ -69,29 +77,75 @@ function pauseTail() {
     if (tailing) {
         openFile(openingFileName);
     } else {
-        if ("" != openingFileName) {
+        if (openingFileName) {
             fs.unwatchFile(openingFileName);
+        }
+        if (currentFd) {
+            fs.close(currentFd);
+            currentFd = null;
         }
     }
     tailing = !tailing;
 }
 
 async function openFile(fileName) {
-    refreshMenuLogLevel();
-    if (document.querySelector("body > div")) {
-        document.querySelector("body > div").remove();
+    // 防止重复打开
+    if (isLoading) {
+        return;
     }
-    lineCount = 0;
-    currentLineNumber = 0; // 重置行号
-    if ("" != openingFileName) {
+
+    isLoading = true;
+
+    // 清理旧的文件监听
+    if (openingFileName) {
         fs.unwatchFile(openingFileName);
     }
-    await loadFile(fileName);
-    watchFile(fileName);
-    openingFileName = fileName;
+    if (currentFd) {
+        fs.close(currentFd);
+        currentFd = null;
+    }
+
+    // 清理旧的表格 - 使用更精确的选择器
+    var oldTable = document.getElementById('log-table');
+    if (oldTable) {
+        oldTable.remove();
+    }
+    // 也清理可能遗留的 body > div
+    var oldDivs = document.querySelectorAll("body > div");
+    oldDivs.forEach(function(div) {
+        div.remove();
+    });
+
+    // 重置状态
+    lineCount = 0;
+    currentLineNumber = 0;
+    opening = true;
+
+    // 刷新日志级别配置
+    refreshMenuLogLevel();
+
+    // 创建新的表格元素，添加唯一 ID
+    var body = document.getElementsByTagName('body')[0];
+    var table = document.createElement('div');
+    table.id = 'log-table';
+    body.appendChild(table);
 
     // 更新最近打开的文件列表
     updateOpenedFiles(fileName);
+
+    // 显示加载效果（在 DOM 更新后）
+    setTimeout(function() {
+        showLoading(true);
+        // 确保 UI 刷新后再开始加载
+        setTimeout(function() {
+            loadFile(fileName, function() {
+                // 文件加载完成后的回调
+                watchFile(fileName);
+                openingFileName = fileName;
+                isLoading = false; // 重置加载标志
+            });
+        }, 50);
+    }, 0);
 }
 
 // 更新最近打开的文件列表
@@ -124,76 +178,183 @@ function updateOpenedFiles(fileName) {
 }
 
 // 加载文件
-async function loadFile(fileName) {
+function loadFile(fileName, callback) {
     opening = true;
-    var body = document.getElementsByTagName('body')[0];
-    var table = document.createElement('div');
-    body.appendChild(table);
-    fs.readFile(fileName, (err, data) => {
-        generateTxt(data.toString(), true);
+
+    // 使用流式读取大文件
+    const readStream = fs.createReadStream(fileName, { encoding: 'utf8' });
+    let remainder = '';
+    let lineBuffer = [];
+    const batchSize = 100; // 每批处理 100 行
+
+    readStream.on('data', (chunk) => {
+        remainder += chunk;
+        var lines = remainder.split(/\r\n|\n|\r/);
+
+        // 最后一行可能不完整，保留到下一次处理
+        remainder = lines.pop() || '';
+
+        for (var i = 0; i < lines.length; i++) {
+            lineBuffer.push(lines[i]);
+
+            // 达到批次大小时处理一次
+            if (lineBuffer.length >= batchSize) {
+                processLines(lineBuffer);
+                lineBuffer = [];
+            }
+        }
+    });
+
+    readStream.on('end', () => {
+        console.log('loadFile: 文件读取完成');
+        // 处理剩余的行
+        if (remainder) {
+            lineBuffer.push(remainder);
+        }
+        if (lineBuffer.length > 0) {
+            processLines(lineBuffer);
+        }
+        // 设置 opening 为 false，表示初始加载完成
+        opening = false;
+        // 数据加载完成后关闭加载效果
+        showLoading(false);
+        console.log('loadFile: 准备调用回调');
+        // 调用回调
+        if (callback) {
+            callback();
+        }
+        console.log('loadFile: 回调执行完成');
+    });
+
+    readStream.on('error', (err) => {
+        console.error('读取文件失败:', err);
+        showLoading(false);
+        opening = false;
+        isLoading = false;
+        // 清理文件描述符
+        if (currentFd) {
+            fs.close(currentFd);
+            currentFd = null;
+        }
+        if (callback) {
+            callback();
+        }
     });
 }
 
+// 处理行数据
+function processLines(lines) {
+    var table = document.getElementById('log-table');
+    if (!table) {
+        console.error('找不到 table 元素');
+        return;
+    }
+
+    // 使用 DocumentFragment 批量插入
+    var fragment = document.createDocumentFragment();
+    var validCount = 0;
+
+    for (var i = 0; i < lines.length; i++) {
+        currentLineNumber++;
+        var lineResult = createLineElement(lines[i], currentLineNumber);
+        if (lineResult) {
+            fragment.appendChild(lineResult);
+            validCount++;
+        }
+    }
+
+    if (fragment.hasChildNodes()) {
+        table.appendChild(fragment);
+        lineCount = table.children.length;
+
+        // 处理超出限制的行
+        while (lineCount > lineMax) {
+            var firstChild = table.firstElementChild;
+            if (firstChild) {
+                firstChild.remove();
+                lineCount = table.children.length;
+            } else {
+                break;
+            }
+        }
+    }
+
+    // 滚动到底部
+    if (opening) {
+        window.scrollTo({ top: document.body.clientHeight });
+    }
+}
+
+// 显示/隐藏加载效果
+function showLoading(show) {
+    let loadingEl = document.getElementById('loading');
+    if (show) {
+        // 取消之前的隐藏定时器
+        if (loadingHideTimer) {
+            clearTimeout(loadingHideTimer);
+            loadingHideTimer = null;
+        }
+        if (!loadingEl) {
+            loadingEl = document.createElement('div');
+            loadingEl.id = 'loading';
+            loadingEl.innerHTML = '<div class="loading-spinner">加载中...</div>';
+            document.body.appendChild(loadingEl);
+        }
+        loadingEl.style.display = 'flex';
+    } else {
+        // 延迟隐藏，确保加载效果至少显示 200ms
+        loadingHideTimer = setTimeout(function() {
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            loadingHideTimer = null;
+        }, 200);
+    }
+}
+
 function watchFile(filename) {
-    console.log('watchFile');
-    opening = false;
     fs.open(filename, 'r', function (error, fd) {
+        if (error) {
+            console.error('打开文件失败:', error);
+            showLoading(false);
+            isLoading = false;
+            return;
+        }
+
+        // 保存当前文件描述符
+        currentFd = fd;
+
         var buffer;
-        var remainder = null;
         fs.watchFile(filename, {
             persistent: true,
             interval: 1000
         }, function (curr, prev) {
-            console.log(curr);
             if (curr.mtime > prev.mtime) {
                 if (curr.size - prev.size > 0) {
                     // 显示最新添加的文件内容
-                    //文件内容有变化，那么通知相应的进程可以执行相关操作。例如读物文件写入数据库等
                     buffer = new Buffer.alloc(curr.size - prev.size);
                     fs.read(fd, buffer, 0, (curr.size - prev.size), prev.size, function (err, bytesRead, buffer) {
-                        generateTxt(buffer.toString());
+                        if (err) {
+                            console.error('读取文件失败:', err);
+                            return;
+                        }
+                        var lines = buffer.toString().split(/\r\n|\n|\r/);
+                        processLines(lines);
                     });
                 } else if (curr.size - prev.size < 0) {
                     // 文件删除了部分数据，需要重新加载
                     openFile(filename);
-                } else {
-                    //没有变化
-                    openFile(filename);
                 }
-            } else {
-                console.log('文件读取错误');
+                // 文件大小无变化时，不做任何操作
             }
         });
-
     });
 }
 
-function generateTxt(str, isInitialLoad = false) { // 处理新增内容的地方
-    var temp = str.split('\r\n');
-    var skipLen = 0;
-    if (temp.length > lineMax) {
-        skipLen = temp.length - lineMax;
-    }
-    var table = document.querySelector("body > div");
-
-    // 如果是初始加载，重置行号
-    if (isInitialLoad) {
-        currentLineNumber = 0;
-    }
-
-    for (var s in temp) {
-        skipLen--;
-        currentLineNumber++;
-        //if (skipLen <= 0) {
-        insertLine(temp[s], currentLineNumber);
-        //}
-    }
-}
-
-function insertLine(text, lineNumber) {
+// 创建行元素，返回 null 表示跳过该行
+function createLineElement(text, lineNumber) {
     text = text.trim();
-    if ('' === text) return;
-    var table = document.querySelector("body > div");
+    if ('' === text) return null;
 
     // 尝试解析 JSON
     let temp;
@@ -201,7 +362,6 @@ function insertLine(text, lineNumber) {
         temp = JSON.parse(text.toString());
     } catch (error) {
         // JSON 解析失败，显示错误提示行
-        limitMaxLine();
         var tr = document.createElement('div');
         tr.className = "tr";
         tr.style.color = "red";
@@ -209,12 +369,14 @@ function insertLine(text, lineNumber) {
         errorMsg.className = "logMsg";
         errorMsg.innerText = `第 ${lineNumber} 行不是合法的 JSON: ${error.message}`;
         tr.appendChild(errorMsg);
-        table.appendChild(tr);
-        return;
+        return tr;
     }
 
-    if (logLevleEnum[temp[fieldMapping.level]] < currentLogLevel) return;
-    limitMaxLine();
+    var levelValue = logLevleEnum[temp[fieldMapping.level]];
+    if (levelValue === undefined || levelValue < currentLogLevel) {
+        return null;
+    }
+
     var tr = document.createElement('div');
     var td1 = document.createElement('span');
     var td2 = document.createElement('span');
@@ -248,20 +410,8 @@ function insertLine(text, lineNumber) {
 
     tr.appendChild(td1);
     tr.appendChild(td2);
-    table.appendChild(tr);
-    if (opening) {
-        window.scrollTo({ top: document.body.clientHeight });
-    } else {
-        window.scrollTo({ top: document.body.clientHeight, behavior: 'smooth' });
-    }
     lineCount++;
-}
-
-function limitMaxLine() {
-    if (lineCount > lineMax) {
-        document.querySelector("body > div > div:nth-child(1)").remove();
-        lineCount--;
-    }
+    return tr;
 }
 
 document.addEventListener("drop", (e) => {

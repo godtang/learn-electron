@@ -1,4 +1,4 @@
-body > div{   
+#log-table {
   border-left: 1px solid red;
   border-top: 1px solid red;
   border-right: 1px solid red
@@ -71,6 +71,28 @@ search button.active {
 }
 
 /* 为固定查找框预留空间 */
-body > div {
+#log-table {
   margin-top: 70px;
+}
+
+/* 加载效果 */
+#loading {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  background-color: white;
+  padding: 20px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
 }
