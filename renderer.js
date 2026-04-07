@@ -417,7 +417,9 @@ function createLineElement(text, lineNumber) {
         return tr;
     }
 
-    var levelValue = logLevleEnum[temp[fieldMapping.level]];
+    var levelKey = temp[fieldMapping.level];
+    // 日志级别忽略大小写比较
+    var levelValue = levelKey ? logLevleEnum[levelKey.toUpperCase()] : undefined;
     if (levelValue === undefined || levelValue < currentLogLevel) {
         return null;
     }
