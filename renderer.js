@@ -541,8 +541,13 @@ function setLogLevel(level) {
             //读取本地的json文件
             let result = JSON.parse(fs.readFileSync(configFile));
             result['log']['level'] = currentLogLevel;
-            var text = JSON.stringify(result, "\n", 4);
+            var text = JSON.stringify(result, null, 4);
             fs.writeFileSync(configFile, text);
+
+            // 重新打开当前文件以应用新的日志级别
+            if (openingFileName) {
+                openFile(openingFileName);
+            }
         }
     });
 
