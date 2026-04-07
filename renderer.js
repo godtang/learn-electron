@@ -396,6 +396,20 @@ function getMessageField(temp) {
     return undefined;
 }
 
+// 获取时间字段值：优先使用配置的 fieldMapping.timestamp，否则查找 timestamp 字段
+function getTimeField(temp) {
+    // 如果配置了 timestamp 字段且存在，优先使用
+    if (fieldMapping.timestamp && temp[fieldMapping.timestamp] !== undefined) {
+        return temp[fieldMapping.timestamp];
+    }
+    // 否则查找 timestamp 字段
+    if (temp['timestamp'] !== undefined) {
+        return temp['timestamp'];
+    }
+    // 如果都没有，返回空字符串
+    return '';
+}
+
 // 创建行元素，返回 null 表示跳过该行
 function createLineElement(text, lineNumber) {
     text = text.trim();
@@ -428,7 +442,7 @@ function createLineElement(text, lineNumber) {
     var td1 = document.createElement('span');
     var td2 = document.createElement('span');
     tr.className = "tr";
-    td1.innerText = temp[fieldMapping.timestamp];
+    td1.innerText = getTimeField(temp);
     td1.className = "logTime";
 
     // 获取消息字段：优先使用配置的 fieldMapping.message，否则依次查找 description、message
