@@ -379,6 +379,23 @@ function watchFile(filename) {
     });
 }
 
+// 获取消息字段值：优先使用配置的 fieldMapping.message，否则依次查找 description、message
+function getMessageField(temp) {
+    // 如果配置了 message 字段且存在，优先使用
+    if (fieldMapping.message && temp[fieldMapping.message] !== undefined) {
+        return temp[fieldMapping.message];
+    }
+    // 否则依次查找 description、message
+    if (temp['description'] !== undefined) {
+        return temp['description'];
+    }
+    if (temp['message'] !== undefined) {
+        return temp['message'];
+    }
+    // 如果都没有，返回 undefined
+    return undefined;
+}
+
 // 创建行元素，返回 null 表示跳过该行
 function createLineElement(text, lineNumber) {
     text = text.trim();
@@ -411,7 +428,9 @@ function createLineElement(text, lineNumber) {
     tr.className = "tr";
     td1.innerText = temp[fieldMapping.timestamp];
     td1.className = "logTime";
-    var msg = temp[fieldMapping.message];
+
+    // 获取消息字段：优先使用配置的 fieldMapping.message，否则依次查找 description、message
+    var msg = getMessageField(temp);
 
     // 处理消息内容
     var msgText;
