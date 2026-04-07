@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require("fs");
 const getMenuTemplate = require('./menu.js');
 
+let currentMenu = null;
+
 function createWindow() {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
@@ -21,6 +23,7 @@ function createWindow() {
     mainWindow.loadFile('index.html');
     //定义菜单模板
     const menu = Menu.buildFromTemplate(getMenuTemplate(mainWindow));
+    currentMenu = menu;
     refreshMenuLogLevel(menu);
     Menu.setApplicationMenu(menu);
     // Open the DevTools.
@@ -52,6 +55,18 @@ app.on('window-all-closed', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+// 监听刷新菜单的事件
+const { ipcMain } = require('electron');
+ipcMain.on('refreshMenu', (event) => {
+    const mainWindow = BrowserWindow.getAllWindows()[0];
+    if (mainWindow) {
+        const menu = Menu.buildFromTemplate(getMenuTemplate(mainWindow));
+        currentMenu = menu;
+        refreshMenuLogLevel(menu);
+        Menu.setApplicationMenu(menu);
+    }
+});
 
 function refreshMenuLogLevel(menu) {
     const configFile = "true" == `${process.env.DEBUG}` ? path.join(process.cwd(), 'config.json') : path.join(process.cwd(), 'resources/app/config.json');

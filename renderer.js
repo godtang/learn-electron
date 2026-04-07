@@ -87,6 +87,38 @@ async function openFile(fileName) {
     await loadFile(fileName);
     watchFile(fileName);
     openingFileName = fileName;
+
+    // 更新最近打开的文件列表
+    updateOpenedFiles(fileName);
+}
+
+// 更新最近打开的文件列表
+function updateOpenedFiles(fileName) {
+    const configFile = "true" == `${process.env.DEBUG}`
+        ? path.join(process.cwd(), 'config.json')
+        : path.join(process.cwd(), 'resources/app/config.json');
+
+    fs.exists(configFile, function(exists) {
+        if (!exists) return;
+
+        let config = JSON.parse(fs.readFileSync(configFile));
+        if (!config.openedFiles) {
+            config.openedFiles = [];
+        }
+        // 移除已存在的相同文件
+        config.openedFiles = config.openedFiles.filter(f => f !== fileName);
+        // 添加到开头
+        config.openedFiles.unshift(fileName);
+        // 最多保留 5 个
+        if (config.openedFiles.length > 5) {
+            config.openedFiles.pop();
+        }
+        // 保存配置
+        fs.writeFileSync(configFile, JSON.stringify(config, null, 4));
+
+        // 通知主进程刷新菜单
+        ipcRenderer.send('refreshMenu');
+    });
 }
 
 // 加载文件
