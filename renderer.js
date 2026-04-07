@@ -16,6 +16,7 @@ var filesize = 0;
 var opening = true;
 var tailing = false;
 var lineCount = 0;
+var currentLineNumber = 0; // 当前处理行号
 const lineMax = 1000;
 
 // 高亮关键词数组
@@ -81,6 +82,7 @@ async function openFile(fileName) {
         document.querySelector("body > div").remove();
     }
     lineCount = 0;
+    currentLineNumber = 0; // 重置行号
     if ("" != openingFileName) {
         fs.unwatchFile(openingFileName);
     }
@@ -128,7 +130,7 @@ async function loadFile(fileName) {
     var table = document.createElement('div');
     body.appendChild(table);
     fs.readFile(fileName, (err, data) => {
-        generateTxt(data.toString());
+        generateTxt(data.toString(), true);
     });
 }
 
@@ -166,26 +168,51 @@ function watchFile(filename) {
     });
 }
 
-function generateTxt(str) { // 处理新增内容的地方
+function generateTxt(str, isInitialLoad = false) { // 处理新增内容的地方
     var temp = str.split('\r\n');
     var skipLen = 0;
     if (temp.length > lineMax) {
         skipLen = temp.length - lineMax;
     }
     var table = document.querySelector("body > div");
+
+    // 如果是初始加载，重置行号
+    if (isInitialLoad) {
+        currentLineNumber = 0;
+    }
+
     for (var s in temp) {
         skipLen--;
+        currentLineNumber++;
         //if (skipLen <= 0) {
-        insertLine(temp[s]);
+        insertLine(temp[s], currentLineNumber);
         //}
     }
 }
 
-function insertLine(text) {
+function insertLine(text, lineNumber) {
     text = text.trim();
     if ('' === text) return;
     var table = document.querySelector("body > div");
-    let temp = JSON.parse(text.toString());
+
+    // 尝试解析 JSON
+    let temp;
+    try {
+        temp = JSON.parse(text.toString());
+    } catch (error) {
+        // JSON 解析失败，显示错误提示行
+        limitMaxLine();
+        var tr = document.createElement('div');
+        tr.className = "tr";
+        tr.style.color = "red";
+        var errorMsg = document.createElement('span');
+        errorMsg.className = "logMsg";
+        errorMsg.innerText = `第 ${lineNumber} 行不是合法的 JSON: ${error.message}`;
+        tr.appendChild(errorMsg);
+        table.appendChild(tr);
+        return;
+    }
+
     if (logLevleEnum[temp[fieldMapping.level]] < currentLogLevel) return;
     limitMaxLine();
     var tr = document.createElement('div');
