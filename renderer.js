@@ -410,6 +410,44 @@ function getTimeField(temp) {
     return '';
 }
 
+// 提取并格式化字符串中的 JSON
+function formatEmbeddedJson(str) {
+    // 尝试查找 JSON 对象（以 { 开始，} 结束）
+    var jsonStart = str.indexOf('{');
+    var jsonEnd = str.lastIndexOf('}');
+
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        var jsonStr = str.substring(jsonStart, jsonEnd + 1);
+        try {
+            var jsonObj = JSON.parse(jsonStr);
+            var formattedJson = JSON.stringify(jsonObj, null, '\t');
+            // 替换原字符串中的 JSON 部分
+            return str.substring(0, jsonStart) + formattedJson + str.substring(jsonEnd + 1);
+        } catch (error) {
+            // 解析失败，返回原字符串
+        }
+    }
+
+    // 尝试查找 JSON 数组（以 [ 开始，] 结束）
+    var arrayStart = str.indexOf('[');
+    var arrayEnd = str.lastIndexOf(']');
+
+    if (arrayStart !== -1 && arrayEnd !== -1 && arrayEnd > arrayStart) {
+        var arrayStr = str.substring(arrayStart, arrayEnd + 1);
+        try {
+            var jsonArray = JSON.parse(arrayStr);
+            var formattedArray = JSON.stringify(jsonArray, null, '\t');
+            // 替换原字符串中的数组部分
+            return str.substring(0, arrayStart) + formattedArray + str.substring(arrayEnd + 1);
+        } catch (error) {
+            // 解析失败，返回原字符串
+        }
+    }
+
+    // 没有 JSON，返回原字符串
+    return str;
+}
+
 // 创建行元素，返回 null 表示跳过该行
 function createLineElement(text, lineNumber) {
     text = text.trim();
@@ -451,12 +489,8 @@ function createLineElement(text, lineNumber) {
     // 处理消息内容
     var msgText;
     if (typeof msg === "string") {
-        try {
-            msg = JSON.parse(msg);
-            msgText = JSON.stringify(msg, null, '\t');
-        } catch (error) {
-            msgText = msg;
-        }
+        // 尝试提取并格式化字符串中的 JSON
+        msgText = formatEmbeddedJson(msg);
     } else {
         msgText = JSON.stringify(msg, null, '\t');
     }
