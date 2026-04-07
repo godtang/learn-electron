@@ -20,6 +20,8 @@ var currentLineNumber = 0; // 当前处理行号
 var isLoading = false; // 是否正在加载文件
 var currentFd = null; // 当前打开的文件描述符
 var loadingHideTimer = null; // 隐藏加载效果的定时器
+var loadingTimer = null; // 加载计时器
+var loadingStartTime = 0; // 加载开始时间
 const lineMax = 1000;
 
 // 高亮关键词数组
@@ -112,7 +114,7 @@ async function openFile(fileName) {
     }
     // 也清理可能遗留的 body > div
     var oldDivs = document.querySelectorAll("body > div");
-    oldDivs.forEach(function(div) {
+    oldDivs.forEach(function (div) {
         div.remove();
     });
 
@@ -134,11 +136,11 @@ async function openFile(fileName) {
     updateOpenedFiles(fileName);
 
     // 显示加载效果（在 DOM 更新后）
-    setTimeout(function() {
+    setTimeout(function () {
         showLoading(true);
         // 确保 UI 刷新后再开始加载
-        setTimeout(function() {
-            loadFile(fileName, function() {
+        setTimeout(function () {
+            loadFile(fileName, function () {
                 // 文件加载完成后的回调
                 watchFile(fileName);
                 openingFileName = fileName;
@@ -154,7 +156,7 @@ function updateOpenedFiles(fileName) {
         ? path.join(process.cwd(), 'config.json')
         : path.join(process.cwd(), 'resources/app/config.json');
 
-    fs.exists(configFile, function(exists) {
+    fs.exists(configFile, function (exists) {
         if (!exists) return;
 
         let config = JSON.parse(fs.readFileSync(configFile));
@@ -294,16 +296,40 @@ function showLoading(show) {
             clearTimeout(loadingHideTimer);
             loadingHideTimer = null;
         }
+        // 记录开始时间
+        loadingStartTime = Date.now();
+
         if (!loadingEl) {
             loadingEl = document.createElement('div');
             loadingEl.id = 'loading';
-            loadingEl.innerHTML = '<div class="loading-spinner">加载中...</div>';
+            loadingEl.innerHTML = '<div class="loading-spinner">加载中... <span id="loading-time">0.0s</span></div>';
             document.body.appendChild(loadingEl);
+        } else {
+            // 更新内部 HTML 确保有计时显示
+            loadingEl.innerHTML = '<div class="loading-spinner">加载中... <span id="loading-time">0.0s</span></div>';
         }
         loadingEl.style.display = 'flex';
+
+        // 启动计时器，每秒更新一次
+        if (loadingTimer) {
+            clearInterval(loadingTimer);
+        }
+        loadingTimer = setInterval(function () {
+            var elapsed = (Date.now() - loadingStartTime) / 1000;
+            var timeEl = document.getElementById('loading-time');
+            if (timeEl) {
+                timeEl.textContent = elapsed.toFixed(1) + 's';
+            }
+        }, 100);
     } else {
+        // 停止计时器
+        if (loadingTimer) {
+            clearInterval(loadingTimer);
+            loadingTimer = null;
+        }
+
         // 延迟隐藏，确保加载效果至少显示 200ms
-        loadingHideTimer = setTimeout(function() {
+        loadingHideTimer = setTimeout(function () {
             if (loadingEl) {
                 loadingEl.style.display = 'none';
             }
